@@ -19,6 +19,7 @@ type Service interface {
 	Ping() error
 	Time() (time.Time, error)
 	OrderBook(obr OrderBookRequest) (*OrderBook, error)
+	Trades(atr TradesRequest) ([]*PublicTrade, error)
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)
 	Klines(kr KlinesRequest) ([]*Kline, error)
 	Ticker24(tr TickerRequest) (*Ticker24, error)

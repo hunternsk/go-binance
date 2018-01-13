@@ -107,6 +107,61 @@ func (as *apiService) OrderBook(obr OrderBookRequest) (*OrderBook, error) {
 
 	return ob, nil
 }
+func (as *apiService) Trades(req TradesRequest) ([]*PublicTrade, error) {
+	params := make(map[string]string)
+	params["symbol"] = req.Symbol
+	if req.Limit != 0 {
+		params["limit"] = strconv.Itoa(req.Limit)
+	}
+
+	res, err := as.request("GET", "api/v1/trades", params, false, false)
+	if err != nil {
+		return nil, err
+	}
+	textRes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response from AggTrades")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		as.handleError(textRes)
+	}
+
+	rawTrades := []struct {
+		ID             int    `json:"id"`
+		Price          string `json:"price"`
+		Quantity       string `json:"qty"`
+		Timestamp      int64  `json:"time"`
+		BuyerMaker     bool   `json:"isBuyerMaker"`
+		BestPriceMatch bool   `json:"isBestMatch"`
+	}{}
+	if err := json.Unmarshal(textRes, &rawTrades); err != nil {
+		return nil, errors.Wrap(err, "trades unmarshal failed")
+	}
+	trades := []*PublicTrade{}
+	for _, rawTrade := range rawTrades {
+		price, err := floatFromString(rawTrade.Price)
+		if err != nil {
+			return nil, err
+		}
+		quantity, err := floatFromString(rawTrade.Quantity)
+		if err != nil {
+			return nil, err
+		}
+		t := time.Unix(0, rawTrade.Timestamp*int64(time.Millisecond))
+
+		trades = append(trades, &PublicTrade{
+			ID:             rawTrade.ID,
+			Price:          price,
+			Quantity:       quantity,
+			Timestamp:      t,
+			BuyerMaker:     rawTrade.BuyerMaker,
+			BestPriceMatch: rawTrade.BestPriceMatch,
+		})
+	}
+	return trades, nil
+}
 
 func (as *apiService) AggTrades(atr AggTradesRequest) ([]*AggTrade, error) {
 	params := make(map[string]string)
