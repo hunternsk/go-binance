@@ -30,8 +30,8 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 	params["side"] = string(or.Side)
 	params["type"] = string(or.Type)
 	params["timeInForce"] = string(or.TimeInForce)
-	params["quantity"] = strconv.FormatFloat(or.Quantity, 'f', 10, 64)
-	params["price"] = strconv.FormatFloat(or.Price, 'f', 10, 64)
+	params["quantity"] = strconv.FormatFloat(or.Quantity, 'f', 8, 64)
+	params["price"] = strconv.FormatFloat(or.Price, 'f', 8, 64)
 	params["timestamp"] = strconv.FormatInt(unixMillis(or.Timestamp), 10)
 	if or.NewClientOrderID != "" {
 		params["newClientOrderId"] = or.NewClientOrderID
