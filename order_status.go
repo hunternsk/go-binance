@@ -24,3 +24,7 @@ var (
 	SideBuy  = OrderSide("BUY")
 	SideSell = OrderSide("SELL")
 )
+
+func (o OrderStatus) String() string {
+	return string(o)
+}
