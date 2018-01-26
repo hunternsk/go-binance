@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -346,6 +347,8 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 					return
 				}
 
+				level.Error(as.Logger).Log("payload", payload, "type", payload.Type)
+
 				// deal with different payload types
 				if payload.Type == "outboundAccountInfo" {
 					rawAccount := struct {
@@ -422,20 +425,19 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						Side                     string  `json:"S"`
 						OrderType                string  `json:"o"`
 						TimeInForce              string  `json:"f"`
-						Quantity                 float64 `json:"q"`
-						Price                    float64 `json:"p"`
-						StopPrice                float64 `json:"P"`
-						IcebergQty               float64 `json:"F"`
+						Quantity                 string  `json:"q"`
+						Price                    string  `json:"p"`
+						StopPrice                string  `json:"P"`
+						IcebergQty               string  `json:"F"`
 						OriginalClientOrderID    string  `json:"C"`
 						ExecutionType            string  `json:"x"`
 						Status                   string  `json:"X"`
 						OrderRejectReason        string  `json:"r"`
 						OrderID                  int     `json:"i"`
-						LastExecutedQuantity     float64 `json:"l"`
-						CumulativeFilledQuantity float64 `json:"z"`
-						LastExecutedPrice        float64 `json:"L"`
-						CommissionAmount         float64 `json:"n"`
-						CommissionAsset          string  `json:"N"`
+						LastExecutedQuantity     string  `json:"l"`
+						CumulativeFilledQuantity string  `json:"z"`
+						LastExecutedPrice        string  `json:"L"`
+						CommissionAmount         string  `json:"n"`
 						TransactionTime          float64 `json:"T"`
 						TradeID                  float64 `json:"t"`
 					}{}
@@ -451,6 +453,32 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						return
 					}
 
+					price, err := strconv.ParseFloat(rawOrderUpdate.Price, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse Price")
+						return
+					}
+					origQty, err := strconv.ParseFloat(rawOrderUpdate.Quantity, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse origQty")
+						return
+					}
+					execQty, err := strconv.ParseFloat(rawOrderUpdate.LastExecutedQuantity, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse execQty")
+						return
+					}
+					stopPrice, err := strconv.ParseFloat(rawOrderUpdate.StopPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse stopPrice")
+						return
+					}
+					icebergQty, err := strconv.ParseFloat(rawOrderUpdate.IcebergQty, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse icebergQty")
+						return
+					}
+
 					ae := &AccountEvent{
 						WSEvent: WSEvent{
 							Type: rawOrderUpdate.Type,
@@ -461,15 +489,15 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 							Symbol:        rawOrderUpdate.Symbol,
 							OrderID:       rawOrderUpdate.OrderID,
 							ClientOrderID: rawOrderUpdate.ClientOrderID,
-							Price:         rawOrderUpdate.Price,
-							OrigQty:       rawOrderUpdate.Quantity,
-							ExecutedQty:   rawOrderUpdate.LastExecutedQuantity,
+							Price:         price,
+							OrigQty:       origQty,
+							ExecutedQty:   execQty,
 							Status:        OrderStatus(rawOrderUpdate.Status),
 							TimeInForce:   TimeInForce(rawOrderUpdate.TimeInForce),
 							Type:          OrderType(rawOrderUpdate.Type),
 							Side:          OrderSide(rawOrderUpdate.Side),
-							StopPrice:     rawOrderUpdate.StopPrice,
-							IcebergQty:    rawOrderUpdate.IcebergQty,
+							StopPrice:     stopPrice,
+							IcebergQty:    icebergQty,
 							Time:          t,
 						},
 					}
