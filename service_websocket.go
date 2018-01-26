@@ -340,21 +340,19 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 
 				// get payload type
 				payload := struct {
-					Type string `json:"e"`
+					Type string  `json:"e"`
+					Time float64 `json:"E"`
 				}{}
 				if err := json.Unmarshal(message, &payload); err != nil {
 					level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
 					return
 				}
 
-				level.Error(as.Logger).Log("payload", payload, "type", payload.Type)
-
 				// deal with different payload types
 				if payload.Type == "outboundAccountInfo" {
 					rawAccount := struct {
 						Type            string  `json:"e"`
 						Time            float64 `json:"E"`
-						OpenTime        float64 `json:"t"`
 						MakerCommision  int64   `json:"m"`
 						TakerCommision  int64   `json:"t"`
 						BuyerCommision  int64   `json:"b"`
@@ -424,6 +422,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						ClientOrderID            string  `json:"c"`
 						Side                     string  `json:"S"`
 						OrderType                string  `json:"o"`
+						UnknownField             float64 `json:"O"`
 						TimeInForce              string  `json:"f"`
 						Quantity                 string  `json:"q"`
 						Price                    string  `json:"p"`
