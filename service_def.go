@@ -19,6 +19,7 @@ type Service interface {
 	Ping() error
 	Time() (time.Time, error)
 	OrderBook(obr OrderBookRequest) (*OrderBook, error)
+	Trades(atr TradesRequest) ([]*PublicTrade, error)
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)
 	Klines(kr KlinesRequest) ([]*Kline, error)
 	Ticker24(tr TickerRequest) (*Ticker24, error)
@@ -98,12 +99,13 @@ func (as *apiService) request(method string, endpoint string, params map[string]
 		req.Header.Add("X-MBX-APIKEY", as.APIKey)
 	}
 	if sign {
-		level.Debug(as.Logger).Log("queryString", q.Encode())
+		//level.Debug(as.Logger).Log("queryString", q.Encode())
 		q.Add("signature", as.Signer.Sign([]byte(q.Encode())))
-		level.Debug(as.Logger).Log("signature", as.Signer.Sign([]byte(q.Encode())))
+		//level.Debug(as.Logger).Log("signature", q.Get("signature"))
 	}
 	req.URL.RawQuery = q.Encode()
 
+	level.Debug(as.Logger).Log("req.URL.String()", req.URL.String())
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err

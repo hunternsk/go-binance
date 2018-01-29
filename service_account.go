@@ -10,7 +10,7 @@ import (
 
 type rawExecutedOrder struct {
 	Symbol        string  `json:"symbol"`
-	OrderID       int     `json:"orderId"`
+	OrderID       int64   `json:"orderId"`
 	ClientOrderID string  `json:"clientOrderId"`
 	Price         string  `json:"price"`
 	OrigQty       string  `json:"origQty"`

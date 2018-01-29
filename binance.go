@@ -20,6 +20,8 @@ type Binance interface {
 	Time() (time.Time, error)
 	// OrderBook returns list of orders.
 	OrderBook(obr OrderBookRequest) (*OrderBook, error)
+	// Trades returns recent list of trades.
+	Trades(req TradesRequest) ([]*PublicTrade, error)
 	// AggTrades returns compressed/aggregate list of trades.
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)
 	// Klines returns klines/candlestick data.
@@ -142,6 +144,16 @@ type AggTrade struct {
 	BestPriceMatch bool
 }
 
+// Trade represents   trade.
+type PublicTrade struct {
+	ID             int
+	Price          float64
+	Quantity       float64
+	Timestamp      time.Time
+	BuyerMaker     bool
+	BestPriceMatch bool
+}
+
 type AggTradeEvent struct {
 	WSEvent
 	AggTrade
@@ -154,6 +166,17 @@ type AggTradesRequest struct {
 	StartTime int64
 	EndTime   int64
 	Limit     int
+}
+
+// TradesRequest represents Trades request data.
+type TradesRequest struct {
+	Symbol string
+	Limit  int
+}
+
+// AggTrades returns compressed/aggregate list of trades.
+func (b *binance) Trades(atr TradesRequest) ([]*PublicTrade, error) {
+	return b.Service.Trades(atr)
 }
 
 // AggTrades returns compressed/aggregate list of trades.
@@ -298,7 +321,7 @@ type QueryOrderRequest struct {
 // ExecutedOrder represents data about executed order.
 type ExecutedOrder struct {
 	Symbol        string
-	OrderID       int
+	OrderID       int64
 	ClientOrderID string
 	Price         float64
 	OrigQty       float64
