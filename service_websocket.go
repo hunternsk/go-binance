@@ -448,7 +448,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						ExecutionType            string  `json:"x"`
 						Status                   string  `json:"X"`
 						OrderRejectReason        string  `json:"r"`
-						OrderID                  int     `json:"i"`
+						OrderID                  int64   `json:"i"`
 						LastExecutedQuantity     string  `json:"l"`
 						CumulativeFilledQuantity string  `json:"z"`
 						LastExecutedPrice        string  `json:"L"`

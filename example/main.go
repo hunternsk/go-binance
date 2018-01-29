@@ -7,9 +7,9 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/bwmuller/go-binance"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/binance-exchange/go-binance"
 )
 
 func main() {

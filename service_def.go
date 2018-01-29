@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
 )
 
@@ -105,7 +104,6 @@ func (as *apiService) request(method string, endpoint string, params map[string]
 	}
 	req.URL.RawQuery = q.Encode()
 
-	level.Debug(as.Logger).Log("req.URL.String()", req.URL.String())
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
