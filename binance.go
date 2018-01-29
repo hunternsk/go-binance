@@ -410,6 +410,7 @@ type Account struct {
 type AccountEvent struct {
 	WSEvent
 	Account
+	ExecutedOrder
 }
 
 // Balance groups balance-related information.
