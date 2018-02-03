@@ -299,6 +299,10 @@ type ProcessedOrder struct {
 	TransactTime  time.Time
 }
 
+func (o *ProcessedOrder) String() string {
+	return fmt.Sprintf("{'Symbol': '%s', 'OrderId': %d, 'ClientOrderId': '%s', TransactTime: '%s'}", o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime)
+}
+
 // NewOrder places new order and returns ProcessedOrder.
 func (b *binance) NewOrder(nor NewOrderRequest) (*ProcessedOrder, error) {
 	return b.Service.NewOrder(nor)
