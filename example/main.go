@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/bwmuller/go-binance"
+	binance "github.com/OopsMouse/go-binance"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 )

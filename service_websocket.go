@@ -12,6 +12,152 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+func (as *apiService) Tickers24Websocket() (chan *Tickers24Event, chan struct{}, error) {
+	url := "wss://stream.binance.com:9443/ws/!ticker@arr"
+	c, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
+
+	done := make(chan struct{})
+	tech := make(chan *Tickers24Event)
+
+	go func() {
+		defer c.Close()
+		defer close(done)
+		for {
+			select {
+			case <-as.Ctx.Done():
+				level.Info(as.Logger).Log("closing reader")
+				return
+			default:
+				_, message, err := c.ReadMessage()
+				if err != nil {
+					level.Error(as.Logger).Log("wsRead", err)
+					return
+				}
+				rawTickers24 := []struct {
+					Symbol             string  `json:"s"`
+					PriceChange        string  `json:"p"`
+					PriceChangePercent string  `json:"P"`
+					WeightedAvgPrice   string  `json:"w"`
+					PrevClosePrice     string  `json:"x"`
+					LastPrice          string  `json:"c"`
+					BidPrice           string  `json:"b"`
+					AskPrice           string  `json:"a"`
+					OpenPrice          string  `json:"o"`
+					HighPrice          string  `json:"h"`
+					LowPrice           string  `json:"l"`
+					Volume             string  `json:"v"`
+					OpenTime           float64 `json:"O"`
+					CloseTime          float64 `json:"C"`
+					FirstID            int     `json:"F"`
+					LastID             int     `json:"L"`
+					Count              int     `json:"n"`
+				}{}
+				te := &Tickers24Event{
+					Tickers24: []*Ticker24{},
+				}
+				if err := json.Unmarshal(message, &rawTickers24); err != nil {
+					level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+					return
+				}
+				for _, rawTicker24 := range rawTickers24 {
+					pc, err := strconv.ParseFloat(rawTicker24.PriceChange, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					pcPercent, err := strconv.ParseFloat(rawTicker24.PriceChangePercent, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					wap, err := strconv.ParseFloat(rawTicker24.WeightedAvgPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					pcp, err := strconv.ParseFloat(rawTicker24.PrevClosePrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					lastPrice, err := strconv.ParseFloat(rawTicker24.LastPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					bp, err := strconv.ParseFloat(rawTicker24.BidPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					ap, err := strconv.ParseFloat(rawTicker24.AskPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					op, err := strconv.ParseFloat(rawTicker24.OpenPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					hp, err := strconv.ParseFloat(rawTicker24.HighPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					lowPrice, err := strconv.ParseFloat(rawTicker24.LowPrice, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					vol, err := strconv.ParseFloat(rawTicker24.Volume, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					ot, err := timeFromUnixTimestampFloat(rawTicker24.OpenTime)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					ct, err := timeFromUnixTimestampFloat(rawTicker24.CloseTime)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					t24 := &Ticker24{
+						Symbol:             rawTicker24.Symbol,
+						PriceChange:        pc,
+						PriceChangePercent: pcPercent,
+						WeightedAvgPrice:   wap,
+						PrevClosePrice:     pcp,
+						LastPrice:          lastPrice,
+						BidPrice:           bp,
+						AskPrice:           ap,
+						OpenPrice:          op,
+						HighPrice:          hp,
+						LowPrice:           lowPrice,
+						Volume:             vol,
+						OpenTime:           ot,
+						CloseTime:          ct,
+						FirstID:            rawTicker24.FirstID,
+						LastID:             rawTicker24.LastID,
+						Count:              rawTicker24.Count,
+					}
+					te.Tickers24 = append(te.Tickers24, t24)
+				}
+				tech <- te
+			}
+		}
+	}()
+
+	go as.exitHandler(c, done)
+	return tech, done, nil
+}
+
 func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEvent, chan struct{}, error) {
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth", strings.ToLower(dwr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)

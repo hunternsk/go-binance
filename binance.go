@@ -26,6 +26,8 @@ type Binance interface {
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)
 	// Klines returns klines/candlestick data.
 	Klines(kr KlinesRequest) ([]*Kline, error)
+	// Tickers24 returns all 24hr price change statistics.
+	Tickers24() ([]*Ticker24, error)
 	// Ticker24 returns 24hr price change statistics.
 	Ticker24(tr TickerRequest) (*Ticker24, error)
 	// TickerAllPrices returns ticker data for symbols.
@@ -64,6 +66,7 @@ type Binance interface {
 	// CloseUserDataStream closes opened stream.
 	CloseUserDataStream(s *Stream) error
 
+	Tickers24Websocket() (chan *Tickers24Event, chan struct{}, error)
 	DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEvent, chan struct{}, error)
 	KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEvent, chan struct{}, error)
 	TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeEvent, chan struct{}, error)
@@ -229,6 +232,7 @@ type TickerRequest struct {
 
 // Ticker24 represents data for 24hr ticker.
 type Ticker24 struct {
+	Symbol             string
 	PriceChange        float64
 	PriceChangePercent float64
 	WeightedAvgPrice   float64
@@ -245,6 +249,15 @@ type Ticker24 struct {
 	FirstID            int
 	LastID             int
 	Count              int
+}
+
+type Tickers24Event struct {
+	Tickers24 []*Ticker24
+}
+
+// Ticker24 returns all 24hr price change statistics.
+func (b *binance) Tickers24() ([]*Ticker24, error) {
+	return b.Service.Tickers24()
 }
 
 // Ticker24 returns 24hr price change statistics.
@@ -541,6 +554,10 @@ type WSEvent struct {
 	Type   string
 	Time   time.Time
 	Symbol string
+}
+
+func (b *binance) Tickers24Websocket() (chan *Tickers24Event, chan struct{}, error) {
+	return b.Service.Tickers24Websocket()
 }
 
 type DepthWebsocketRequest struct {

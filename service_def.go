@@ -21,6 +21,7 @@ type Service interface {
 	Trades(atr TradesRequest) ([]*PublicTrade, error)
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)
 	Klines(kr KlinesRequest) ([]*Kline, error)
+	Tickers24() ([]*Ticker24, error)
 	Ticker24(tr TickerRequest) (*Ticker24, error)
 	TickerAllPrices() ([]*PriceTicker, error)
 	TickerAllBooks() ([]*BookTicker, error)
@@ -42,6 +43,7 @@ type Service interface {
 	KeepAliveUserDataStream(s *Stream) error
 	CloseUserDataStream(s *Stream) error
 
+	Tickers24Websocket() (chan *Tickers24Event, chan struct{}, error)
 	DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEvent, chan struct{}, error)
 	KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEvent, chan struct{}, error)
 	TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeEvent, chan struct{}, error)
