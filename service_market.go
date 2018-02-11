@@ -44,6 +44,40 @@ func (as *apiService) Time() (time.Time, error) {
 	return t, nil
 }
 
+func (as *apiService) ExchangeInfo() (*ExchangeInfo, error) {
+	res, err := as.request("GET", "api/v1/exchangeInfo", nil, false, false)
+	if err != nil {
+		return nil, err
+	}
+	textRes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response from Time")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		as.handleError(textRes)
+	}
+
+	rawExchangeInfo := &struct {
+		Symbols []map[string]interface{} `json:"symbols"`
+	}{}
+	if err := json.Unmarshal(textRes, rawExchangeInfo); err != nil {
+		return nil, errors.Wrap(err, "timeResponse unmarshal failed")
+	}
+	exInfo := &ExchangeInfo{
+		Symbols: []SymbolInfo{},
+	}
+	for _, s := range rawExchangeInfo.Symbols {
+		exInfo.Symbols = append(exInfo.Symbols, SymbolInfo{
+			Symbol:     s["symbol"].(string),
+			QuoteAsset: s["quoteAsset"].(string),
+			Status:     s["status"].(string),
+		})
+	}
+	return exInfo, nil
+}
+
 func (as *apiService) OrderBook(obr OrderBookRequest) (*OrderBook, error) {
 	params := make(map[string]string)
 	params["symbol"] = obr.Symbol

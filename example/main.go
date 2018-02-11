@@ -32,6 +32,13 @@ func main() {
 	)
 	b := binance.NewBinance(binanceService)
 
+	ex, err := b.ExchangeInfo()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%#v\n", ex)
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 

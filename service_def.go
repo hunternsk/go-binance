@@ -17,6 +17,7 @@ import (
 type Service interface {
 	Ping() error
 	Time() (time.Time, error)
+	ExchangeInfo() (*ExchangeInfo, error)
 	OrderBook(obr OrderBookRequest) (*OrderBook, error)
 	Trades(atr TradesRequest) ([]*PublicTrade, error)
 	AggTrades(atr AggTradesRequest) ([]*AggTrade, error)

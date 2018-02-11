@@ -18,6 +18,8 @@ type Binance interface {
 	Ping() error
 	// Time returns server time.
 	Time() (time.Time, error)
+	// ExchangeInfo returns exchange information
+	ExchangeInfo() (*ExchangeInfo, error)
 	// OrderBook returns list of orders.
 	OrderBook(obr OrderBookRequest) (*OrderBook, error)
 	// Trades returns recent list of trades.
@@ -103,6 +105,20 @@ func (b *binance) Ping() error {
 // Time returns server time.
 func (b *binance) Time() (time.Time, error) {
 	return b.Service.Time()
+}
+
+type SymbolInfo struct {
+	Symbol     string
+	Status     string
+	QuoteAsset string
+}
+
+type ExchangeInfo struct {
+	Symbols []SymbolInfo
+}
+
+func (b *binance) ExchangeInfo() (*ExchangeInfo, error) {
+	return b.Service.ExchangeInfo()
 }
 
 // OrderBook represents Bids and Asks.
