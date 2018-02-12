@@ -49,6 +49,7 @@ type Service interface {
 	KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEvent, chan struct{}, error)
 	TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeEvent, chan struct{}, error)
 	UserDataWebsocket(udwr UserDataWebsocketRequest) (chan *AccountEvent, chan struct{}, error)
+	OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook, chan struct{}, error)
 }
 
 type apiService struct {

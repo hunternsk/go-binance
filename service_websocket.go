@@ -158,6 +158,82 @@ func (as *apiService) Tickers24Websocket() (chan *Tickers24Event, chan struct{},
 	return tech, done, nil
 }
 
+func (as *apiService) OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook, chan struct{}, error) {
+	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth5", strings.ToLower(obr.Symbol))
+	c, _, err := websocket.DefaultDialer.Dial(url, nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
+
+	done := make(chan struct{})
+	obch := make(chan *OrderBook)
+
+	go func() {
+		defer c.Close()
+		defer close(done)
+		for {
+			select {
+			case <-as.Ctx.Done():
+				level.Info(as.Logger).Log("closing reader")
+				return
+			default:
+				_, message, err := c.ReadMessage()
+				if err != nil {
+					level.Error(as.Logger).Log("wsRead", err)
+					return
+				}
+				rawBook := &struct {
+					LastUpdateID int             `json:"lastUpdateId"`
+					Bids         [][]interface{} `json:"bids"`
+					Asks         [][]interface{} `json:"asks"`
+				}{}
+				if err := json.Unmarshal(message, rawBook); err != nil {
+					level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+					return
+				}
+
+				ob := &OrderBook{
+					LastUpdateID: rawBook.LastUpdateID,
+				}
+				extractOrder := func(rawPrice, rawQuantity interface{}) (*Order, error) {
+					price, err := floatFromString(rawPrice)
+					if err != nil {
+						return nil, err
+					}
+					quantity, err := floatFromString(rawQuantity)
+					if err != nil {
+						return nil, err
+					}
+					return &Order{
+						Price:    price,
+						Quantity: quantity,
+					}, nil
+				}
+				for _, bid := range rawBook.Bids {
+					order, err := extractOrder(bid[0], bid[1])
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					ob.Bids = append(ob.Bids, order)
+				}
+				for _, ask := range rawBook.Asks {
+					order, err := extractOrder(ask[0], ask[1])
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						return
+					}
+					ob.Asks = append(ob.Asks, order)
+				}
+				obch <- ob
+			}
+		}
+	}()
+
+	go as.exitHandler(c, done)
+	return obch, done, nil
+}
+
 func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEvent, chan struct{}, error) {
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth", strings.ToLower(dwr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)

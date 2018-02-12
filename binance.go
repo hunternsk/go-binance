@@ -73,6 +73,7 @@ type Binance interface {
 	KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEvent, chan struct{}, error)
 	TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeEvent, chan struct{}, error)
 	UserDataWebsocket(udwr UserDataWebsocketRequest) (chan *AccountEvent, chan struct{}, error)
+	OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook, chan struct{}, error)
 }
 
 type binance struct {
@@ -111,6 +112,7 @@ type SymbolInfo struct {
 	Symbol     string
 	Status     string
 	QuoteAsset string
+	BaseAsset  string
 }
 
 type ExchangeInfo struct {
@@ -149,6 +151,10 @@ type OrderBookRequest struct {
 // OrderBook returns list of orders.
 func (b *binance) OrderBook(obr OrderBookRequest) (*OrderBook, error) {
 	return b.Service.OrderBook(obr)
+}
+
+func (b *binance) OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook, chan struct{}, error) {
+	return b.Service.OrderBookWebsocket(obr)
 }
 
 // AggTrade represents aggregated trade.
