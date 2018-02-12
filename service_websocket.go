@@ -3,7 +3,6 @@ package binance
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +15,8 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth", strings.ToLower(dwr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		panic(err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -34,6 +34,7 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 				_, message, err := c.ReadMessage()
 				if err != nil {
 					level.Error(as.Logger).Log("wsRead", err)
+					panic(err)
 					return
 				}
 				rawDepth := struct {
@@ -46,11 +47,13 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 				}{}
 				if err := json.Unmarshal(message, &rawDepth); err != nil {
 					level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+					panic(err)
 					return
 				}
 				t, err := timeFromUnixTimestampFloat(rawDepth.Time)
 				if err != nil {
 					level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+					panic(err)
 					return
 				}
 				de := &DepthEvent{
@@ -65,11 +68,13 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 					p, err := floatFromString(b[0])
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						panic(err)
 						return
 					}
 					q, err := floatFromString(b[1])
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						panic(err)
 						return
 					}
 					de.Bids = append(de.Bids, &Order{
@@ -81,11 +86,13 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 					p, err := floatFromString(a[0])
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						panic(err)
 						return
 					}
 					q, err := floatFromString(a[1])
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", string(message))
+						panic(err)
 						return
 					}
 					de.Asks = append(de.Asks, &Order{
@@ -106,7 +113,7 @@ func (as *apiService) KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEven
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@kline_%s", strings.ToLower(kwr.Symbol), string(kwr.Interval))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -246,7 +253,7 @@ func (as *apiService) TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeE
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@aggTrade", strings.ToLower(twr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -333,7 +340,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s", urwr.ListenKey)
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})

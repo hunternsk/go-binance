@@ -10,6 +10,7 @@ import (
 	"github.com/bwmuller/go-binance"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 		Symbol: "ETHBTC",
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error starting binance example client trade websocket"))
 	}
 	go func() {
 		for {
@@ -66,7 +67,7 @@ func main() {
 		Interval: binance.Hour,
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error starting binance example client klines"))
 	}
 	fmt.Printf("%#v\n", kl)
 
@@ -80,7 +81,7 @@ func main() {
 		Timestamp:   time.Now(),
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error creating binance example client new order"))
 	}
 	fmt.Println(newOrder)
 
@@ -91,7 +92,7 @@ func main() {
 		Timestamp:  time.Now(),
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error creating binance example client new order query"))
 	}
 	fmt.Printf("%#v\n", res2)
 
@@ -101,7 +102,7 @@ func main() {
 		Timestamp:  time.Now(),
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error getting binance example client open order"))
 	}
 	fmt.Printf("%#v\n", res4)
 
@@ -111,7 +112,7 @@ func main() {
 		Timestamp: time.Now(),
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error binance example client cancel order"))
 	}
 	fmt.Printf("%#v\n", res3)
 
@@ -121,7 +122,7 @@ func main() {
 		Timestamp:  time.Now(),
 	})
 	if err != nil {
-		panic(err)
+		panic(errors.Wrap(err, "Error binance example client get all order"))
 	}
 	fmt.Printf("%#v\n", res5[0])
 

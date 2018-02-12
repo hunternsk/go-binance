@@ -297,6 +297,22 @@ type ProcessedOrder struct {
 	OrderID       int64
 	ClientOrderID string
 	TransactTime  time.Time
+	Price         float64
+	OrigQty       float64
+	ExecutedQty   float64
+	Status        OrderStatus
+	TimeInForce   TimeInForce
+	Type          OrderType
+	Side          OrderSide
+	Fills         []*OrderFill
+}
+
+// OrderFill respresents data from a processed order that depicts if it was filled or not
+type OrderFill struct {
+	Price          float64
+	Qty            float64
+	Comission      float64
+	CommisionAsset string
 }
 
 func (o *ProcessedOrder) String() string {
