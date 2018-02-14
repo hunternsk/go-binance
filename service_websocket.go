@@ -159,7 +159,7 @@ func (as *apiService) Tickers24Websocket() (chan *Tickers24Event, chan struct{},
 }
 
 func (as *apiService) OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook, chan struct{}, error) {
-	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth5", strings.ToLower(obr.Symbol))
+	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth%d", strings.ToLower(obr.Symbol), obr.Level)
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
 		log.Fatal("dial:", err)

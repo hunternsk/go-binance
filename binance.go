@@ -146,6 +146,7 @@ type Order struct {
 type OrderBookRequest struct {
 	Symbol string
 	Limit  int
+	Level  int
 }
 
 // OrderBook returns list of orders.
