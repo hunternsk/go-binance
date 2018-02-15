@@ -108,15 +108,18 @@ func (b *binance) Time() (time.Time, error) {
 	return b.Service.Time()
 }
 
-type SymbolInfo struct {
-	Symbol     string
-	Status     string
-	QuoteAsset string
-	BaseAsset  string
+type Symbol struct {
+	Symbol             string
+	Status             string
+	QuoteAsset         string
+	QuotePrecision     int
+	BaseAsset          string
+	BaseAssetPrecision int
+	Filters            []map[string]interface{}
 }
 
 type ExchangeInfo struct {
-	Symbols []SymbolInfo
+	Symbols []Symbol
 }
 
 func (b *binance) ExchangeInfo() (*ExchangeInfo, error) {

@@ -66,14 +66,32 @@ func (as *apiService) ExchangeInfo() (*ExchangeInfo, error) {
 		return nil, errors.Wrap(err, "timeResponse unmarshal failed")
 	}
 	exInfo := &ExchangeInfo{
-		Symbols: []SymbolInfo{},
+		Symbols: []Symbol{},
 	}
 	for _, s := range rawExchangeInfo.Symbols {
-		exInfo.Symbols = append(exInfo.Symbols, SymbolInfo{
-			Symbol:     s["symbol"].(string),
-			QuoteAsset: s["quoteAsset"].(string),
-			Status:     s["status"].(string),
-		})
+		symbol := s["symbol"].(string)
+		status := s["status"].(string)
+		quoteAsset := s["quoteAsset"].(string)
+		quotePrecision := int(s["quotePrecision"].(float64))
+		baseAsset := s["baseAsset"].(string)
+		baseAssetPrecision := int(s["baseAssetPrecision"].(float64))
+
+		filters := []map[string]interface{}{}
+
+		for _, f := range s["filters"].([]interface{}) {
+			filters = append(filters, f.(map[string]interface{}))
+		}
+
+		si := Symbol{
+			Symbol:             symbol,
+			Status:             status,
+			QuoteAsset:         quoteAsset,
+			QuotePrecision:     quotePrecision,
+			BaseAsset:          baseAsset,
+			BaseAssetPrecision: baseAssetPrecision,
+			Filters:            filters,
+		}
+		exInfo.Symbols = append(exInfo.Symbols, si)
 	}
 	return exInfo, nil
 }
