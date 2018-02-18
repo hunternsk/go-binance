@@ -289,7 +289,17 @@ type NewOrderRequest struct {
 	StopPrice        float64
 	IcebergQty       float64
 	Timestamp        time.Time
+	ResponseType     OrderResponseType
 }
+
+type OrderResponseType string
+
+const (
+	ORT_UNDEFINED OrderResponseType = ""
+	ORT_ACK       OrderResponseType = "ACK"
+	ORT_RESULT    OrderResponseType = "RESULT"
+	ORT_FULL      OrderResponseType = "FULL"
+)
 
 // ProcessedOrder represents data from processed order.
 type ProcessedOrder struct {
@@ -309,10 +319,10 @@ type ProcessedOrder struct {
 
 // OrderFill respresents data from a processed order that depicts if it was filled or not
 type OrderFill struct {
-	Price          float64
-	Qty            float64
-	Comission      float64
-	CommisionAsset string
+	Price          float64 `json:"price"`
+	Quantity       float64 `json:"qty"`
+	Comission      float64 `json:"commission"`
+	CommisionAsset string  `json:"commissionAsset"`
 }
 
 func (o *ProcessedOrder) String() string {

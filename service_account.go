@@ -31,6 +31,9 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 	params["type"] = string(or.Type)
 	params["quantity"] = strconv.FormatFloat(or.Quantity, 'f', 8, 64)
 	params["timestamp"] = strconv.FormatInt(unixMillis(or.Timestamp), 10)
+	if or.ResponseType != "" && or.ResponseType != ORT_UNDEFINED {
+		params["newOrderRespType"] = string(or.ResponseType)
+	}
 	if or.NewClientOrderID != "" {
 		params["newClientOrderId"] = or.NewClientOrderID
 	}
@@ -66,6 +69,14 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 		OrderID       int64   `json:"orderId"`
 		ClientOrderID string  `json:"clientOrderId"`
 		TransactTime  float64 `json:"transactTime"`
+		Price         float64
+		OrigQty       float64
+		ExecutedQty   float64
+		Status        string
+		TimeInForce   string
+		Type          string
+		Side          string
+		Fills         []*OrderFill
 	}{}
 	if err := json.Unmarshal(textRes, &rawOrder); err != nil {
 		return nil, errors.Wrap(err, "rawOrder unmarshal failed")
@@ -81,6 +92,14 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 		OrderID:       rawOrder.OrderID,
 		ClientOrderID: rawOrder.ClientOrderID,
 		TransactTime:  t,
+		Price:         rawOrder.Price,
+		OrigQty:       rawOrder.OrigQty,
+		ExecutedQty:   rawOrder.ExecutedQty,
+		Status:        OrderStatus(rawOrder.Status),
+		TimeInForce:   TimeInForce(rawOrder.TimeInForce),
+		Type:          OrderType(rawOrder.Type),
+		Side:          OrderSide(rawOrder.Side),
+		Fills:         rawOrder.Fills,
 	}, nil
 }
 
