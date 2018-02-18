@@ -269,6 +269,7 @@ type Ticker24 struct {
 	OpenPrice          float64
 	HighPrice          float64
 	LowPrice           float64
+	QuoteVolume        float64
 	Volume             float64
 	OpenTime           time.Time
 	CloseTime          time.Time

@@ -406,6 +406,7 @@ func (as *apiService) Tickers24() ([]*Ticker24, error) {
 		OpenPrice          string  `json:"openPrice"`
 		HighPrice          string  `json:"highPrice"`
 		LowPrice           string  `json:"lowPrice"`
+		QuoteVolume        string  `json:"quoteVolume"`
 		Volume             string  `json:"volume"`
 		OpenTime           float64 `json:"openTime"`
 		CloseTime          float64 `json:"closeTime"`
@@ -460,6 +461,10 @@ func (as *apiService) Tickers24() ([]*Ticker24, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot parse Ticker24.LowPrice")
 		}
+		qvol, err := strconv.ParseFloat(rawTicker24.QuoteVolume, 64)
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot parse Ticker24.QuoteVolume")
+		}
 		vol, err := strconv.ParseFloat(rawTicker24.Volume, 64)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot parse Ticker24.Volume")
@@ -484,6 +489,7 @@ func (as *apiService) Tickers24() ([]*Ticker24, error) {
 			OpenPrice:          op,
 			HighPrice:          hp,
 			LowPrice:           lowPrice,
+			QuoteVolume:        qvol,
 			Volume:             vol,
 			OpenTime:           ot,
 			CloseTime:          ct,
@@ -526,6 +532,7 @@ func (as *apiService) Ticker24(tr TickerRequest) (*Ticker24, error) {
 		OpenPrice          string  `json:"openPrice"`
 		HighPrice          string  `json:"highPrice"`
 		LowPrice           string  `json:"lowPrice"`
+		QuoteVolume        string  `json:"quoteVolume"`
 		Volume             string  `json:"volume"`
 		OpenTime           float64 `json:"openTime"`
 		CloseTime          float64 `json:"closeTime"`
@@ -577,6 +584,10 @@ func (as *apiService) Ticker24(tr TickerRequest) (*Ticker24, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse Ticker24.LowPrice")
 	}
+	qvol, err := strconv.ParseFloat(rawTicker24.QuoteVolume, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Ticker24.QuoteVolume")
+	}
 	vol, err := strconv.ParseFloat(rawTicker24.Volume, 64)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse Ticker24.Volume")
@@ -601,6 +612,7 @@ func (as *apiService) Ticker24(tr TickerRequest) (*Ticker24, error) {
 		OpenPrice:          op,
 		HighPrice:          hp,
 		LowPrice:           lowPrice,
+		QuoteVolume:        qvol,
 		Volume:             vol,
 		OpenTime:           ot,
 		CloseTime:          ct,
