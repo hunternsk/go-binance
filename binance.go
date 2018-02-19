@@ -317,16 +317,22 @@ type ProcessedOrder struct {
 	Fills         []*OrderFill
 }
 
-// OrderFill respresents data from a processed order that depicts if it was filled or not
-type OrderFill struct {
-	Price          float64 `json:"price"`
-	Quantity       float64 `json:"qty"`
-	Comission      float64 `json:"commission"`
-	CommisionAsset string  `json:"commissionAsset"`
+func (o *ProcessedOrder) String() string {
+	return fmt.Sprintf("{'Symbol': '%s', 'OrderId': %d, 'ClientOrderId': '%s', 'TransactTime': '%s', 'Price': '%s', 'OrigQty': '%s', 'ExecutedQty': '%s', 'Status': '%s', 'TimeInForce': '%s', 'Type': '%s', 'Side': '%s', 'Fills': '%s' }",
+		o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime, floatToString(o.Price), floatToString(o.OrigQty), floatToString(o.ExecutedQty), o.Status, o.TimeInForce, o.Type, o.Side, o.Fills)
 }
 
-func (o *ProcessedOrder) String() string {
-	return fmt.Sprintf("{'Symbol': '%s', 'OrderId': %d, 'ClientOrderId': '%s', TransactTime: '%s'}", o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime)
+// OrderFill respresents data from a processed order that depicts if it was filled or not
+type OrderFill struct {
+	Price           float64
+	Quantity        float64
+	Commission      float64
+	CommissionAsset string
+}
+
+func (o *OrderFill) String() string {
+	return fmt.Sprintf("{'Price': '%s', 'Quantity': '%s', 'Commission': '%s', 'CommissionAsset': '%s' }",
+		floatToString(o.Price), floatToString(o.Quantity), floatToString(o.Commission), o.CommissionAsset)
 }
 
 // NewOrder places new order and returns ProcessedOrder.

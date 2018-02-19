@@ -3,6 +3,7 @@ package binance
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -22,6 +23,26 @@ type rawExecutedOrder struct {
 	StopPrice     string  `json:"stopPrice"`
 	IcebergQty    string  `json:"icebergQty"`
 	Time          float64 `json:"time"`
+}
+
+type rawExecutedOrderResponse struct {
+	Symbol        string  `json:"symbol"`
+	OrderID       int64   `json:"orderId"`
+	ClientOrderID string  `json:"clientOrderId"`
+	TransactTime  float64 `json:"transactTime"`
+	Price         string  `json:"price"`
+	OrigQty       string  `json:"origQty"`
+	ExecutedQty   string  `json:"executedQty"`
+	Status        string  `json:"status"`
+	TimeInForce   string  `json:"timeInForce"`
+	Type          string  `json:"type"`
+	Side          string  `json:"side"`
+	Fills         []struct {
+		Price           string `json:"price"`
+		Quantity        string `json:"qty"`
+		Commission      string `json:"commission"`
+		CommissionAsset string `json:"commissionAsset"`
+	} `json:"fills"`
 }
 
 func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
@@ -64,20 +85,8 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 		return nil, as.handleError(textRes)
 	}
 
-	rawOrder := struct {
-		Symbol        string  `json:"symbol"`
-		OrderID       int64   `json:"orderId"`
-		ClientOrderID string  `json:"clientOrderId"`
-		TransactTime  float64 `json:"transactTime"`
-		Price         float64
-		OrigQty       float64
-		ExecutedQty   float64
-		Status        string
-		TimeInForce   string
-		Type          string
-		Side          string
-		Fills         []*OrderFill
-	}{}
+	log.Println(string(textRes))
+	rawOrder := rawExecutedOrderResponse{}
 	if err := json.Unmarshal(textRes, &rawOrder); err != nil {
 		return nil, errors.Wrap(err, "rawOrder unmarshal failed")
 	}
@@ -87,20 +96,39 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 		return nil, err
 	}
 
-	return &ProcessedOrder{
+	result := &ProcessedOrder{
 		Symbol:        rawOrder.Symbol,
 		OrderID:       rawOrder.OrderID,
 		ClientOrderID: rawOrder.ClientOrderID,
 		TransactTime:  t,
-		Price:         rawOrder.Price,
-		OrigQty:       rawOrder.OrigQty,
-		ExecutedQty:   rawOrder.ExecutedQty,
 		Status:        OrderStatus(rawOrder.Status),
 		TimeInForce:   TimeInForce(rawOrder.TimeInForce),
 		Type:          OrderType(rawOrder.Type),
 		Side:          OrderSide(rawOrder.Side),
-		Fills:         rawOrder.Fills,
-	}, nil
+	}
+	result.Price, err = floatFromString(rawOrder.Price)
+	result.OrigQty, err = floatFromString(rawOrder.OrigQty)
+	result.ExecutedQty, err = floatFromString(rawOrder.ExecutedQty)
+	result.Price, err = floatFromString(rawOrder.Price)
+	result.Fills = make([]*OrderFill, 0)
+	for _, val := range rawOrder.Fills {
+		fill := &OrderFill{}
+		fill.Price, err = floatFromString(val.Price)
+		if err == nil {
+			fill.Commission, err = floatFromString(val.Commission)
+			if err == nil {
+				fill.Quantity, err = floatFromString(val.Quantity)
+				if err == nil {
+					fill.CommissionAsset = val.CommissionAsset
+				}
+			}
+		}
+		if err == nil {
+			result.Fills = append(result.Fills, fill)
+		}
+	}
+
+	return result, nil
 }
 
 func (as *apiService) NewOrderTest(or NewOrderRequest) error {
