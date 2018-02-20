@@ -3,7 +3,6 @@ package binance
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -16,7 +15,7 @@ func (as *apiService) Tickers24Websocket() (chan *Tickers24Event, chan struct{},
 	url := "wss://stream.binance.com:9443/ws/!ticker@arr"
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -162,7 +161,7 @@ func (as *apiService) OrderBookWebsocket(obr OrderBookRequest) (chan *OrderBook,
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth%d", strings.ToLower(obr.Symbol), obr.Level)
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -238,7 +237,7 @@ func (as *apiService) DepthWebsocket(dwr DepthWebsocketRequest) (chan *DepthEven
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@depth", strings.ToLower(dwr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -328,7 +327,7 @@ func (as *apiService) KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEven
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@kline_%s", strings.ToLower(kwr.Symbol), string(kwr.Interval))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -468,7 +467,7 @@ func (as *apiService) TradeWebsocket(twr TradeWebsocketRequest) (chan *AggTradeE
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s@aggTrade", strings.ToLower(twr.Symbol))
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
@@ -555,7 +554,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 	url := fmt.Sprintf("wss://stream.binance.com:9443/ws/%s", urwr.ListenKey)
 	c, _, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		return nil, nil, err
 	}
 
 	done := make(chan struct{})
