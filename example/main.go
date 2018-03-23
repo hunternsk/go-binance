@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/bwmuller/go-binance"
+	binance "github.com/OopsMouse/go-binance"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
@@ -33,10 +33,17 @@ func main() {
 	)
 	b := binance.NewBinance(binanceService)
 
+	ex, err := b.ExchangeInfo()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%#v\n", ex)
+
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
-	kech, done, err := b.TradeWebsocket(binance.TradeWebsocketRequest{
+	kech, done, err := b.OrderBookWebsocket(binance.OrderBookRequest{
 		Symbol: "ETHBTC",
 	})
 	if err != nil {
