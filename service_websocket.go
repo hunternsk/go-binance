@@ -757,16 +757,16 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 }
 
 func (as *apiService) exitHandler(c *websocket.Conn, done chan struct{}) {
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 	defer c.Close()
 
 	for {
 		select {
 		case t := <-ticker.C:
-			err := c.WriteMessage(websocket.TextMessage, []byte(t.String()))
+			err := c.WriteMessage(websocket.PingMessage, []byte(t.String()))
 			if err != nil {
-				level.Error(as.Logger).Log("wsWrite", err)
+				level.Error(as.Logger).Log("wsPingWrite", err)
 				return
 			}
 		case <-as.Ctx.Done():
@@ -774,7 +774,7 @@ func (as *apiService) exitHandler(c *websocket.Conn, done chan struct{}) {
 			case <-done:
 			case <-time.After(time.Second):
 			}
-			level.Info(as.Logger).Log("closing connection")
+			level.Info(as.Logger).Log("wsPingCtx: closing connection")
 			return
 		}
 	}
