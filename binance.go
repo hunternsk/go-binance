@@ -118,8 +118,17 @@ type Symbol struct {
 	Filters            []map[string]interface{}
 }
 
+type RateLimit struct {
+	Type     string `json:"rateLimitType"`
+	Interval string `json:"interval"`
+	Limit    int64    `json:"limit"`
+}
+
 type ExchangeInfo struct {
-	Symbols []Symbol
+	Timezone   string
+	ServerTime int64
+	RateLimits []RateLimit
+	Symbols    []Symbol
 }
 
 func (b *binance) ExchangeInfo() (*ExchangeInfo, error) {
@@ -358,7 +367,7 @@ type ProcessedOrder struct {
 }
 
 func (o *ProcessedOrder) String() string {
-	return fmt.Sprintf("{'Symbol': '%s', 'OrderId': %d, 'ClientOrderId': '%s', 'TransactTime': '%s', 'Price': '%s', 'OrigQty': '%s', 'ExecutedQty': '%s', 'Status': '%s', 'TimeInForce': '%s', 'Type': '%s', 'Side': '%s', 'Fills': '%s' }",
+	return fmt.Sprintf("{'Currency': '%s', 'OrderId': %d, 'ClientOrderId': '%s', 'TransactTime': '%s', 'Price': '%s', 'OrigQty': '%s', 'ExecutedQty': '%s', 'Status': '%s', 'TimeInForce': '%s', 'Type': '%s', 'Side': '%s', 'Fills': '%s' }",
 		o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime, floatToString(o.Price), floatToString(o.OrigQty), floatToString(o.ExecutedQty), o.Status, o.TimeInForce, o.Type, o.Side, o.Fills)
 }
 
