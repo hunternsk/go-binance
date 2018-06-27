@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bwmuller/go-binance"
 	"github.com/stretchr/testify/assert"
+	"github.com/betazoid/go-binance"
 )
 
 func TestNewOrder(t *testing.T) {
