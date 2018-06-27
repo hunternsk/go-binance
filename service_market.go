@@ -60,13 +60,19 @@ func (as *apiService) ExchangeInfo() (*ExchangeInfo, error) {
 	}
 
 	rawExchangeInfo := &struct {
-		Symbols []map[string]interface{} `json:"symbols"`
+		Timezone   string                   `json:"timezone"`
+		ServerTime int64                    `json:"serverTime"`
+		RateLimits []RateLimit              `json:"rateLimits"`
+		Symbols    []map[string]interface{} `json:"symbols"`
 	}{}
 	if err := json.Unmarshal(textRes, rawExchangeInfo); err != nil {
 		return nil, errors.Wrap(err, "timeResponse unmarshal failed")
 	}
 	exInfo := &ExchangeInfo{
-		Symbols: []Symbol{},
+		Timezone:   rawExchangeInfo.Timezone,
+		ServerTime: rawExchangeInfo.ServerTime,
+		RateLimits: rawExchangeInfo.RateLimits,
+		Symbols:    []Symbol{},
 	}
 	for _, s := range rawExchangeInfo.Symbols {
 		symbol := s["symbol"].(string)
