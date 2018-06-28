@@ -7,10 +7,10 @@ import (
 	"os/signal"
 	"time"
 
-	binance "github.com/OopsMouse/go-binance"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/pkg/errors"
+	"github.com/betazoid/go-binance"
 )
 
 func main() {

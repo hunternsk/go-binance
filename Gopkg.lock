@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/OopsMouse/go-binance"
-  packages = ["."]
-  revision = "489176faa80b17a6c7d002cb017e29aa4aaf3947"
-
-[[projects]]
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
@@ -76,6 +70,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "15d0cf765502254d863e2fe95e052d374a068d25cc892fe4e3864d482fc85125"
+  inputs-digest = "521ff41df5ef0d1a92c36424e13fce1b61e6a2544efddefc1a202be3fff99ba5"
   solver-name = "gps-cdcl"
   solver-version = 1
