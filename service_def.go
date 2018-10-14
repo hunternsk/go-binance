@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // Service represents service layer for Binance API.
@@ -103,10 +104,11 @@ func (as *apiService) request(method string, endpoint string, params map[string]
 	}
 	if sign {
 		//level.Debug(as.Logger).Log("queryString", q.Encode())
-		q.Add("signature", as.Signer.Sign([]byte(q.Encode())))
+		q.Add("zsignature", as.Signer.Sign([]byte(q.Encode())))
 		//level.Debug(as.Logger).Log("signature", q.Get("signature"))
 	}
-	req.URL.RawQuery = q.Encode()
+	//TODO: Ugly movement
+	req.URL.RawQuery = strings.Replace(q.Encode(), "zsignature", "signature", 1)
 
 	resp, err := client.Do(req)
 	if err != nil {
