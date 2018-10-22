@@ -3,7 +3,7 @@ package binance_test
 import (
 	"time"
 
-	"github.com/betazoid/go-binance"
+	"github.com/hunternsk/go-binance"
 	"github.com/stretchr/testify/mock"
 )
 

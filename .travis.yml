@@ -1,4 +1,4 @@
-go_import_path: github.com/betazoid/go-binance
+go_import_path: github.com/hunternsk/go-binance
 
 language: go
 
