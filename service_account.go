@@ -52,7 +52,7 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 	params["type"] = string(or.Type)
 	params["quantity"] = strconv.FormatFloat(or.Quantity, 'f', 8, 64)
 	params["timestamp"] = strconv.FormatInt(unixMillis(or.Timestamp), 10)
-	if or.ResponseType != "" && or.ResponseType != ORT_UNDEFINED {
+	if or.ResponseType != ORT_UNDEFINED {
 		params["newOrderRespType"] = string(or.ResponseType)
 	}
 	if or.NewClientOrderID != "" {
@@ -516,6 +516,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	rawResult := struct {
 		Msg     string `json:"msg"`
 		Success bool   `json:"success"`
+		Id      string `json:"id"`
 	}{}
 	if err := json.Unmarshal(textRes, &rawResult); err != nil {
 		return nil, errors.Wrap(err, "rawTrades unmarshal failed")
@@ -524,6 +525,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	return &WithdrawResult{
 		Msg:     rawResult.Msg,
 		Success: rawResult.Success,
+		Id:		 rawResult.Id,
 	}, nil
 }
 func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
