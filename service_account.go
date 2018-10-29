@@ -16,6 +16,7 @@ type rawExecutedOrder struct {
 	Price         string  `json:"price"`
 	OrigQty       string  `json:"origQty"`
 	ExecutedQty   string  `json:"executedQty"`
+	CumulativeQuoteQty string `json:"cummulativeQuoteQty"`
 	Status        string  `json:"status"`
 	TimeInForce   string  `json:"timeInForce"`
 	Type          string  `json:"type"`
@@ -33,6 +34,7 @@ type rawExecutedOrderResponse struct {
 	Price         string  `json:"price"`
 	OrigQty       string  `json:"origQty"`
 	ExecutedQty   string  `json:"executedQty"`
+	CumulativeQuoteQty string `json:"cummulativeQuoteQty"`
 	Status        string  `json:"status"`
 	TimeInForce   string  `json:"timeInForce"`
 	Type          string  `json:"type"`
@@ -109,6 +111,7 @@ func (as *apiService) NewOrder(or NewOrderRequest) (*ProcessedOrder, error) {
 	result.Price, err = floatFromString(rawOrder.Price)
 	result.OrigQty, err = floatFromString(rawOrder.OrigQty)
 	result.ExecutedQty, err = floatFromString(rawOrder.ExecutedQty)
+	result.CumulativeQuoteQty, err = floatFromString(rawOrder.CumulativeQuoteQty)
 	result.Price, err = floatFromString(rawOrder.Price)
 	result.Fills = make([]*OrderFill, 0)
 	for _, val := range rawOrder.Fills {
@@ -672,6 +675,10 @@ func executedOrderFromRaw(reo *rawExecutedOrder) (*ExecutedOrder, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse Order.ExecutedQty")
 	}
+	cumQuoteQty, err := strconv.ParseFloat(reo.CumulativeQuoteQty, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse Order.CumulativeQuoteQty")
+	}
 	stopPrice, err := strconv.ParseFloat(reo.StopPrice, 64)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot parse Order.StopPrice")
@@ -692,6 +699,7 @@ func executedOrderFromRaw(reo *rawExecutedOrder) (*ExecutedOrder, error) {
 		Price:         price,
 		OrigQty:       origQty,
 		ExecutedQty:   execQty,
+		CumulativeQuoteQty: cumQuoteQty,
 		Status:        OrderStatus(reo.Status),
 		TimeInForce:   TimeInForce(reo.TimeInForce),
 		Type:          OrderType(reo.Type),

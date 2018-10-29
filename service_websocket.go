@@ -423,7 +423,7 @@ func (as *apiService) KlineWebsocket(kwr KlineWebsocketRequest) (chan *KlineEven
 				}
 				qav, err := floatFromString(rawKline.Kline.QuoteAssetVolume)
 				if err != nil {
-					level.Error(as.Logger).Log("wsUnmarshal", err, "body", (rawKline.Kline.QuoteAssetVolume))
+					level.Error(as.Logger).Log("wsUnmarshal", err, "body", rawKline.Kline.QuoteAssetVolume)
 					return
 				}
 				tbbav, err := floatFromString(rawKline.Kline.TakerBuyBaseAssetVolume)
@@ -666,7 +666,6 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						ClientOrderID            string  `json:"c"`
 						Side                     string  `json:"S"`
 						OrderType                string  `json:"o"`
-						UnknownField             float64 `json:"O"`
 						TimeInForce              string  `json:"f"`
 						Quantity                 string  `json:"q"`
 						Price                    string  `json:"p"`
@@ -681,8 +680,11 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						CumulativeFilledQuantity string  `json:"z"`
 						LastExecutedPrice        string  `json:"L"`
 						CommissionAmount         string  `json:"n"`
+						CommissionAsset			 string  `json:"N"`
 						TransactionTime          float64 `json:"T"`
 						TradeID                  float64 `json:"t"`
+						OrderCreationTime        string `json:"O"`
+						CumulativeQuoteQty		 string `json:"Z"`
 					}{}
 
 					if err := json.Unmarshal(message, &rawOrderUpdate); err != nil {
@@ -711,6 +713,11 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse execQty")
 						return
 					}
+					cumQuoteQty, err := strconv.ParseFloat(rawOrderUpdate.CumulativeQuoteQty, 64)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse cumOrderQty")
+						return
+					}
 					stopPrice, err := strconv.ParseFloat(rawOrderUpdate.StopPrice, 64)
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse stopPrice")
@@ -719,6 +726,11 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 					icebergQty, err := strconv.ParseFloat(rawOrderUpdate.IcebergQty, 64)
 					if err != nil {
 						level.Error(as.Logger).Log("wsUnmarshal", err, "body", "cannot parse icebergQty")
+						return
+					}
+					orderCreationTime, err := timeFromUnixTimestampFloat(rawOrderUpdate.OrderCreationTime)
+					if err != nil {
+						level.Error(as.Logger).Log("wsUnmarshal", err, "body", rawOrderUpdate.OrderCreationTime)
 						return
 					}
 
@@ -735,6 +747,8 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 							Price:         price,
 							OrigQty:       origQty,
 							ExecutedQty:   execQty,
+							CumulativeQuoteQty: cumQuoteQty,
+							CommissionAsset: rawOrderUpdate.CommissionAsset,
 							Status:        OrderStatus(rawOrderUpdate.Status),
 							TimeInForce:   TimeInForce(rawOrderUpdate.TimeInForce),
 							Type:          OrderType(rawOrderUpdate.Type),
@@ -742,6 +756,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 							StopPrice:     stopPrice,
 							IcebergQty:    icebergQty,
 							Time:          t,
+							OrderCreationTime: orderCreationTime,
 						},
 					}
 

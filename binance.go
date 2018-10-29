@@ -359,6 +359,7 @@ type ProcessedOrder struct {
 	Price         float64
 	OrigQty       float64
 	ExecutedQty   float64
+	CumulativeQuoteQty float64
 	Status        OrderStatus
 	TimeInForce   TimeInForce
 	Type          OrderType
@@ -367,8 +368,8 @@ type ProcessedOrder struct {
 }
 
 func (o *ProcessedOrder) String() string {
-	return fmt.Sprintf("{'Currency': '%s', 'OrderId': %d, 'ClientOrderId': '%s', 'TransactTime': '%s', 'Price': '%s', 'OrigQty': '%s', 'ExecutedQty': '%s', 'Status': '%s', 'TimeInForce': '%s', 'Type': '%s', 'Side': '%s', 'Fills': '%s' }",
-		o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime, floatToString(o.Price), floatToString(o.OrigQty), floatToString(o.ExecutedQty), o.Status, o.TimeInForce, o.Type, o.Side, o.Fills)
+	return fmt.Sprintf("{'Currency': '%s', 'OrderId': %d, 'ClientOrderId': '%s', 'TransactTime': '%s', 'Price': '%s', 'OrigQty': '%s', 'ExecutedQty': '%s', 'CumulativeQuoteQty': '%s' , 'Status': '%s', 'TimeInForce': '%s', 'Type': '%s', 'Side': '%s', 'Fills': '%s' }",
+		o.Symbol, o.OrderID, o.ClientOrderID, o.TransactTime, floatToString(o.Price), floatToString(o.OrigQty), floatToString(o.ExecutedQty), floatToString(o.CumulativeQuoteQty), o.Status, o.TimeInForce, o.Type, o.Side, o.Fills)
 }
 
 // OrderFill respresents data from a processed order that depicts if it was filled or not
@@ -411,6 +412,8 @@ type ExecutedOrder struct {
 	Price         float64
 	OrigQty       float64
 	ExecutedQty   float64
+	CumulativeQuoteQty float64
+	CommissionAsset string
 	Status        OrderStatus
 	TimeInForce   TimeInForce
 	Type          OrderType
@@ -418,6 +421,7 @@ type ExecutedOrder struct {
 	StopPrice     float64
 	IcebergQty    float64
 	Time          time.Time
+	OrderCreationTime time.Time
 }
 
 // QueryOrder returns data about existing order.
