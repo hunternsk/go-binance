@@ -683,7 +683,7 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						CommissionAsset			 string  `json:"N"`
 						TransactionTime          float64 `json:"T"`
 						TradeID                  float64 `json:"t"`
-						OrderCreationTime        string `json:"O"`
+						OrderCreationTime        float64 `json:"O"`
 						CumulativeQuoteQty		 string `json:"Z"`
 					}{}
 
