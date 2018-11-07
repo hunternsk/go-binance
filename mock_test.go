@@ -86,6 +86,12 @@ func (m *ServiceMock) TickerAllPrices() ([]*binance.PriceTicker, error) {
 	}
 	return ptc, args.Error(1)
 }
+
+func (m *ServiceMock) TickerPrice(symbol string) (*binance.PriceTicker, error) {
+	args := m.Called(symbol)
+	return args.Get(0).(*binance.PriceTicker), args.Error(1)
+}
+
 func (m *ServiceMock) TickerAllBooks() ([]*binance.BookTicker, error) {
 	args := m.Called()
 	btc, ok := args.Get(0).([]*binance.BookTicker)

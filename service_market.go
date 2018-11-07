@@ -632,7 +632,7 @@ func (as *apiService) Ticker24(tr TickerRequest) (*Ticker24, error) {
 func (as *apiService) TickerAllPrices() ([]*PriceTicker, error) {
 	params := make(map[string]string)
 
-	res, err := as.request("GET", "api/v1/ticker/allPrices", params, false, false)
+	res, err := as.request("GET", "api/v3/ticker/price", params, false, false)
 	if err != nil {
 		return nil, err
 	}
@@ -666,6 +666,40 @@ func (as *apiService) TickerAllPrices() ([]*PriceTicker, error) {
 		})
 	}
 	return tpc, nil
+}
+
+func (as *apiService) TickerPrice(symbol string) (*PriceTicker, error) {
+	params := make(map[string]string)
+
+	res, err := as.request("GET", "api/v3/ticker/price", params, false, false)
+	if err != nil {
+		return nil, err
+	}
+	textRes, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to read response from Ticker/Price")
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		as.handleError(textRes)
+	}
+
+	rawTickerPrice := struct {
+		Symbol string `json:"symbol"`
+		Price  string `json:"price"`
+	}{}
+	if err := json.Unmarshal(textRes, &rawTickerPrice); err != nil {
+		return nil, errors.Wrap(err, "rawTickerPrice unmarshal failed")
+	}
+	p, err := strconv.ParseFloat(rawTickerPrice.Price, 64)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot parse TickerPrice.Price")
+	}
+	return &PriceTicker{
+		Symbol: rawTickerPrice.Symbol,
+		Price:  p,
+	}, nil
 }
 
 func (as *apiService) TickerAllBooks() ([]*BookTicker, error) {

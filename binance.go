@@ -34,6 +34,8 @@ type Binance interface {
 	Ticker24(tr TickerRequest) (*Ticker24, error)
 	// TickerAllPrices returns ticker data for symbols.
 	TickerAllPrices() ([]*PriceTicker, error)
+	// TickerPrice returns ticker data for symbol.
+	TickerPrice(symbol string) (*PriceTicker, error)
 	// TickerAllBooks returns tickers for all books.
 	TickerAllBooks() ([]*BookTicker, error)
 
@@ -310,6 +312,11 @@ type PriceTicker struct {
 // TickerAllPrices returns ticker data for symbols.
 func (b *binance) TickerAllPrices() ([]*PriceTicker, error) {
 	return b.Service.TickerAllPrices()
+}
+
+// TickerPrice returns ticker data for symbol.
+func (b *binance) TickerPrice(symbol string) (*PriceTicker, error) {
+	return b.Service.TickerPrice(symbol)
 }
 
 // BookTicker represents book ticker data.

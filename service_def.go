@@ -26,6 +26,7 @@ type Service interface {
 	Tickers24() ([]*Ticker24, error)
 	Ticker24(tr TickerRequest) (*Ticker24, error)
 	TickerAllPrices() ([]*PriceTicker, error)
+	TickerPrice(symbol string) (*PriceTicker, error)
 	TickerAllBooks() ([]*BookTicker, error)
 
 	NewOrder(or NewOrderRequest) (*ProcessedOrder, error)
