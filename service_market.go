@@ -670,6 +670,7 @@ func (as *apiService) TickerAllPrices() ([]*PriceTicker, error) {
 
 func (as *apiService) TickerPrice(symbol string) (*PriceTicker, error) {
 	params := make(map[string]string)
+	params["symbol"] = symbol
 
 	res, err := as.request("GET", "api/v3/ticker/price", params, false, false)
 	if err != nil {
