@@ -498,11 +498,14 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	if wr.RecvWindow != 0 {
 		params["recvWindow"] = strconv.FormatInt(recvWindow(wr.RecvWindow), 10)
 	}
+	if wr.AddressTag != "" {
+		params["addressTag"] = wr.AddressTag
+	}
 	if wr.Name != "" {
 		params["name"] = wr.Name
 	}
 
-	res, err := as.request("POST", "wapi/v1/withdraw.html", params, true, true)
+	res, err := as.request("POST", "wapi/v3/withdraw.html", params, true, true)
 	if err != nil {
 		return nil, err
 	}
