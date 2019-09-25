@@ -680,11 +680,11 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						CumulativeFilledQuantity string  `json:"z"`
 						LastExecutedPrice        string  `json:"L"`
 						CommissionAmount         string  `json:"n"`
-						CommissionAsset			 string  `json:"N"`
+						CommissionAsset          string  `json:"N"`
 						TransactionTime          float64 `json:"T"`
 						TradeID                  float64 `json:"t"`
 						OrderCreationTime        float64 `json:"O"`
-						CumulativeQuoteQty		 string `json:"Z"`
+						CumulativeQuoteQty       string  `json:"Z"`
 					}{}
 
 					if err := json.Unmarshal(message, &rawOrderUpdate); err != nil {
@@ -741,22 +741,22 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 						},
 						Account: Account{},
 						ExecutedOrder: ExecutedOrder{
-							Symbol:        rawOrderUpdate.Symbol,
-							OrderID:       rawOrderUpdate.OrderID,
-							ClientOrderID: rawOrderUpdate.ClientOrderID,
-							Price:         price,
-							OrigQty:       origQty,
-							ExecutedQty:   execQty,
+							Symbol:             rawOrderUpdate.Symbol,
+							OrderID:            rawOrderUpdate.OrderID,
+							ClientOrderID:      rawOrderUpdate.ClientOrderID,
+							Price:              price,
+							OrigQty:            origQty,
+							ExecutedQty:        execQty,
 							CumulativeQuoteQty: cumQuoteQty,
-							CommissionAsset: rawOrderUpdate.CommissionAsset,
-							Status:        OrderStatus(rawOrderUpdate.Status),
-							TimeInForce:   TimeInForce(rawOrderUpdate.TimeInForce),
-							Type:          OrderType(rawOrderUpdate.Type),
-							Side:          OrderSide(rawOrderUpdate.Side),
-							StopPrice:     stopPrice,
-							IcebergQty:    icebergQty,
-							Time:          t,
-							OrderCreationTime: orderCreationTime,
+							CommissionAsset:    rawOrderUpdate.CommissionAsset,
+							Status:             OrderStatus(rawOrderUpdate.Status),
+							TimeInForce:        TimeInForce(rawOrderUpdate.TimeInForce),
+							Type:               OrderType(rawOrderUpdate.Type),
+							Side:               OrderSide(rawOrderUpdate.Side),
+							StopPrice:          stopPrice,
+							IcebergQty:         icebergQty,
+							Time:               t,
+							OrderCreationTime:  orderCreationTime,
 						},
 					}
 
@@ -772,18 +772,10 @@ func (as *apiService) UserDataWebsocket(urwr UserDataWebsocketRequest) (chan *Ac
 }
 
 func (as *apiService) exitHandler(c *websocket.Conn, done chan struct{}) {
-	ticker := time.NewTicker(time.Minute)
-	defer ticker.Stop()
 	defer c.Close()
 
 	for {
 		select {
-		case t := <-ticker.C:
-			err := c.WriteMessage(websocket.PingMessage, []byte(t.String()))
-			if err != nil {
-				level.Error(as.Logger).Log("wsPingWrite", err)
-				return
-			}
 		case <-as.Ctx.Done():
 			select {
 			case <-done:
