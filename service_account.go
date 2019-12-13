@@ -10,36 +10,36 @@ import (
 )
 
 type rawExecutedOrder struct {
-	Symbol        string  `json:"symbol"`
-	OrderID       int64   `json:"orderId"`
-	ClientOrderID string  `json:"clientOrderId"`
-	Price         string  `json:"price"`
-	OrigQty       string  `json:"origQty"`
-	ExecutedQty   string  `json:"executedQty"`
-	CumulativeQuoteQty string `json:"cummulativeQuoteQty"`
-	Status        string  `json:"status"`
-	TimeInForce   string  `json:"timeInForce"`
-	Type          string  `json:"type"`
-	Side          string  `json:"side"`
-	StopPrice     string  `json:"stopPrice"`
-	IcebergQty    string  `json:"icebergQty"`
-	Time          float64 `json:"time"`
+	Symbol             string  `json:"symbol"`
+	OrderID            int64   `json:"orderId"`
+	ClientOrderID      string  `json:"clientOrderId"`
+	Price              string  `json:"price"`
+	OrigQty            string  `json:"origQty"`
+	ExecutedQty        string  `json:"executedQty"`
+	CumulativeQuoteQty string  `json:"cummulativeQuoteQty"`
+	Status             string  `json:"status"`
+	TimeInForce        string  `json:"timeInForce"`
+	Type               string  `json:"type"`
+	Side               string  `json:"side"`
+	StopPrice          string  `json:"stopPrice"`
+	IcebergQty         string  `json:"icebergQty"`
+	Time               float64 `json:"time"`
 }
 
 type rawExecutedOrderResponse struct {
-	Symbol        string  `json:"symbol"`
-	OrderID       int64   `json:"orderId"`
-	ClientOrderID string  `json:"clientOrderId"`
-	TransactTime  float64 `json:"transactTime"`
-	Price         string  `json:"price"`
-	OrigQty       string  `json:"origQty"`
-	ExecutedQty   string  `json:"executedQty"`
-	CumulativeQuoteQty string `json:"cummulativeQuoteQty"`
-	Status        string  `json:"status"`
-	TimeInForce   string  `json:"timeInForce"`
-	Type          string  `json:"type"`
-	Side          string  `json:"side"`
-	Fills         []struct {
+	Symbol             string  `json:"symbol"`
+	OrderID            int64   `json:"orderId"`
+	ClientOrderID      string  `json:"clientOrderId"`
+	TransactTime       float64 `json:"transactTime"`
+	Price              string  `json:"price"`
+	OrigQty            string  `json:"origQty"`
+	ExecutedQty        string  `json:"executedQty"`
+	CumulativeQuoteQty string  `json:"cummulativeQuoteQty"`
+	Status             string  `json:"status"`
+	TimeInForce        string  `json:"timeInForce"`
+	Type               string  `json:"type"`
+	Side               string  `json:"side"`
+	Fills              []struct {
 		Price           string `json:"price"`
 		Quantity        string `json:"qty"`
 		Commission      string `json:"commission"`
@@ -531,7 +531,7 @@ func (as *apiService) Withdraw(wr WithdrawRequest) (*WithdrawResult, error) {
 	return &WithdrawResult{
 		Msg:     rawResult.Msg,
 		Success: rawResult.Success,
-		Id:		 rawResult.Id,
+		Id:      rawResult.Id,
 	}, nil
 }
 func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
@@ -573,6 +573,8 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 			Amount     float64 `json:"amount"`
 			Asset      string  `json:"asset"`
 			Status     int     `json:"status"`
+			Address    *string `json:"address"`
+			TxID       *string `json:"txId"`
 		}
 		Success bool `json:"success"`
 	}{}
@@ -591,6 +593,8 @@ func (as *apiService) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 			Amount:     d.Amount,
 			Asset:      d.Asset,
 			Status:     d.Status,
+			Address:    d.Address,
+			TxID:       d.TxID,
 		})
 	}
 
@@ -615,7 +619,7 @@ func (as *apiService) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) 
 		params["recvWindow"] = strconv.FormatInt(recvWindow(hr.RecvWindow), 10)
 	}
 
-	res, err := as.request("POST", "wapi/v1/getWithdrawHistory.html", params, true, true)
+	res, err := as.request("GET", "wapi/v3/withdrawHistory.html", params, true, true)
 	if err != nil {
 		return nil, err
 	}
@@ -631,13 +635,14 @@ func (as *apiService) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) 
 
 	rawWithdrawHistory := struct {
 		WithdrawList []struct {
-			Id	      string  `json:"id"`
-			Amount    float64 `json:"amount"`
-			Address   string  `json:"address"`
-			TxID      string  `json:"txId"`
-			Asset     string  `json:"asset"`
-			ApplyTime float64 `json:"insertTime"`
-			Status    int     `json:"status"`
+			Id             string  `json:"id"`
+			Amount         float64 `json:"amount"`
+			TransactionFee float64 `json:"transactionFee"`
+			Address        string  `json:"address"`
+			TxID           string  `json:"txId"`
+			Asset          string  `json:"asset"`
+			ApplyTime      float64 `json:"insertTime"`
+			Status         int     `json:"status"`
 		}
 		Success bool `json:"success"`
 	}{}
@@ -652,13 +657,14 @@ func (as *apiService) WithdrawHistory(hr HistoryRequest) ([]*Withdrawal, error) 
 			return nil, err
 		}
 		wc = append(wc, &Withdrawal{
-			Id:        w.Id,
-			Amount:    w.Amount,
-			Address:   w.Address,
-			TxID:      w.TxID,
-			Asset:     w.Asset,
-			ApplyTime: t,
-			Status:    w.Status,
+			Id:             w.Id,
+			Amount:         w.Amount,
+			TransactionFee: w.TransactionFee,
+			Address:        w.Address,
+			TxID:           w.TxID,
+			Asset:          w.Asset,
+			ApplyTime:      t,
+			Status:         w.Status,
 		})
 	}
 
@@ -696,19 +702,19 @@ func executedOrderFromRaw(reo *rawExecutedOrder) (*ExecutedOrder, error) {
 	}
 
 	return &ExecutedOrder{
-		Symbol:        reo.Symbol,
-		OrderID:       reo.OrderID,
-		ClientOrderID: reo.ClientOrderID,
-		Price:         price,
-		OrigQty:       origQty,
-		ExecutedQty:   execQty,
+		Symbol:             reo.Symbol,
+		OrderID:            reo.OrderID,
+		ClientOrderID:      reo.ClientOrderID,
+		Price:              price,
+		OrigQty:            origQty,
+		ExecutedQty:        execQty,
 		CumulativeQuoteQty: cumQuoteQty,
-		Status:        OrderStatus(reo.Status),
-		TimeInForce:   TimeInForce(reo.TimeInForce),
-		Type:          OrderType(reo.Type),
-		Side:          OrderSide(reo.Side),
-		StopPrice:     stopPrice,
-		IcebergQty:    icebergQty,
-		Time:          t,
+		Status:             OrderStatus(reo.Status),
+		TimeInForce:        TimeInForce(reo.TimeInForce),
+		Type:               OrderType(reo.Type),
+		Side:               OrderSide(reo.Side),
+		StopPrice:          stopPrice,
+		IcebergQty:         icebergQty,
+		Time:               t,
 	}, nil
 }

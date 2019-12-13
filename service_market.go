@@ -45,7 +45,7 @@ func (as *apiService) Time() (time.Time, error) {
 }
 
 func (as *apiService) ExchangeInfo() (*ExchangeInfo, error) {
-	res, err := as.request("GET", "api/v1/exchangeInfo", nil, false, false)
+	res, err := as.request("GET", "api/v3/exchangeInfo", nil, false, false)
 	if err != nil {
 		return nil, err
 	}

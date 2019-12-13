@@ -123,7 +123,7 @@ type Symbol struct {
 type RateLimit struct {
 	Type     string `json:"rateLimitType"`
 	Interval string `json:"interval"`
-	Limit    int64    `json:"limit"`
+	Limit    int64  `json:"limit"`
 }
 
 type ExchangeInfo struct {
@@ -359,19 +359,19 @@ const (
 
 // ProcessedOrder represents data from processed order.
 type ProcessedOrder struct {
-	Symbol        string
-	OrderID       int64
-	ClientOrderID string
-	TransactTime  time.Time
-	Price         float64
-	OrigQty       float64
-	ExecutedQty   float64
+	Symbol             string
+	OrderID            int64
+	ClientOrderID      string
+	TransactTime       time.Time
+	Price              float64
+	OrigQty            float64
+	ExecutedQty        float64
 	CumulativeQuoteQty float64
-	Status        OrderStatus
-	TimeInForce   TimeInForce
-	Type          OrderType
-	Side          OrderSide
-	Fills         []*OrderFill
+	Status             OrderStatus
+	TimeInForce        TimeInForce
+	Type               OrderType
+	Side               OrderSide
+	Fills              []*OrderFill
 }
 
 func (o *ProcessedOrder) String() string {
@@ -413,22 +413,22 @@ type QueryOrderRequest struct {
 
 // ExecutedOrder represents data about executed order.
 type ExecutedOrder struct {
-	Symbol        string
-	OrderID       int64
-	ClientOrderID string
-	Price         float64
-	OrigQty       float64
-	ExecutedQty   float64
+	Symbol             string
+	OrderID            int64
+	ClientOrderID      string
+	Price              float64
+	OrigQty            float64
+	ExecutedQty        float64
 	CumulativeQuoteQty float64
-	CommissionAsset string
-	Status        OrderStatus
-	TimeInForce   TimeInForce
-	Type          OrderType
-	Side          OrderSide
-	StopPrice     float64
-	IcebergQty    float64
-	Time          time.Time
-	OrderCreationTime time.Time
+	CommissionAsset    string
+	Status             OrderStatus
+	TimeInForce        TimeInForce
+	Type               OrderType
+	Side               OrderSide
+	StopPrice          float64
+	IcebergQty         float64
+	Time               time.Time
+	OrderCreationTime  time.Time
 }
 
 // QueryOrder returns data about existing order.
@@ -587,6 +587,8 @@ type Deposit struct {
 	Amount     float64
 	Asset      string
 	Status     int
+	Address    *string
+	TxID       *string
 }
 
 // DepositHistory lists deposit data.
@@ -596,13 +598,14 @@ func (b *binance) DepositHistory(hr HistoryRequest) ([]*Deposit, error) {
 
 // Withdrawal represents withdrawal data.
 type Withdrawal struct {
-	Id        string
-	Amount    float64
-	Address   string
-	TxID      string
-	Asset     string
-	ApplyTime time.Time
-	Status    int
+	Id             string
+	Amount         float64
+	TransactionFee float64
+	Address        string
+	TxID           string
+	Asset          string
+	ApplyTime      time.Time
+	Status         int
 }
 
 // WithdrawHistory lists withdraw data.
